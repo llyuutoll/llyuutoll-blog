@@ -1,18 +1,41 @@
 import React from 'react'
-import { Link } from 'gatsby'
+import { graphql, useStaticQuery, Link } from 'gatsby'
 
 import Layout from '../components/layout'
+import blogStyles from './blog.module.scss'
 import Head from '../components/head'
 
-const IndexPage = () => {
+const BlogPage = () => {
+    const data = useStaticQuery(graphql`
+        query {
+            allContentfulBlogPost (sort: { fields: publishedDate, order: DESC }){
+                edges {
+                    node {
+                        title
+                        slug
+                        publishedDate(formatString: "MMMM Do, YYYY")
+                    }
+                }
+            }
+        }
+    `)
     return (
         <Layout>
-            <Head title="Home" />
-            <h1>こんにちわ！</h1>
-            <h2>私は、北海道函館市に住むシステム情報科学を専攻している大学生です。</h2>
-            <p>私に連絡を取りたい方。<Link to="/contact">お問い合わせはこちら</Link></p>
+            <Head title="Home"/>
+            <ol className={blogStyles.posts}>
+                {data.allContentfulBlogPost.edges.map((edge, i) => {
+                    return (
+                        <li className={blogStyles.post} key={i}>
+                            <Link to={`/blog/${edge.node.slug}`}>
+                                <h2>{edge.node.title}</h2>
+                                <p>{edge.node.publishedDate}</p>
+                            </Link>
+                        </li>
+                    )
+                })}
+            </ol>
         </Layout>
     )
 }
 
-export default IndexPage
+export default BlogPage
